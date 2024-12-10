@@ -1,0 +1,48 @@
+<!-- src/index.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Выбор пользователя</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-4 text-center">Выбор пользователя</h2>
+
+        <!-- Выбор существующего пользователя -->
+        <div class="card mb-5 shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">Выберите существующего пользователя</h5>
+            </div>
+            <div class="card-body p-4">
+                <form>
+                    <div class="form-group mb-4">
+                        <label for="existingUser">Пользователь</label>
+                        <select class="form-control" id="existingUser">
+                            <option>Загрузка пользователей...</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="selectUserBtn">Выбрать</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Форма создания нового пользователя -->
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">Создать нового пользователя</h5>
+            </div>
+            <div class="card-body p-4">
+                <form id="newUserForm">
+                    <div class="form-group mb-4">
+                        <label for="newUserName">Имя пользователя</label>
+                        <input type="text" class="form-control" id="newUserName" placeholder="Введите имя пользователя" required>
+                    </div>
+                    <button type="submit" class="btn btn-success">Создать</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
