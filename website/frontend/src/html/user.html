@@ -1,14 +1,14 @@
-<!-- src/index.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Выбор пользователя</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Управление пользователями</title>
 </head>
 <body>
     <div class="container mt-5">
-        <h2 class="mb-4 text-center">Выбор пользователя</h2>
+        <h2 class="mb-4 text-center">Управление пользователями</h2>
 
         <!-- Выбор существующего пользователя -->
         <div class="card mb-5 shadow-sm">
@@ -16,7 +16,7 @@
                 <h5 class="mb-0">Выберите существующего пользователя</h5>
             </div>
             <div class="card-body p-4">
-                <form>
+                <form id="selectUserForm">
                     <div class="form-group mb-4">
                         <label for="existingUser">Пользователь</label>
                         <select class="form-control" id="existingUser">
@@ -24,6 +24,8 @@
                         </select>
                     </div>
                     <button type="button" class="btn btn-primary" id="selectUserBtn">Выбрать</button>
+                    <button type="button" class="btn btn-warning" id="editUserBtn">Редактировать</button>
+                    <button type="button" class="btn btn-danger" id="deleteUserBtn">Удалить</button>
                 </form>
             </div>
         </div>
@@ -44,5 +46,135 @@
             </div>
         </div>
     </div>
+
+    <!-- Модальное окно для редактирования пользователя -->
+    <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editUserModalLabel">Редактировать пользователя</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="editUserForm">
+                        <div class="form-group">
+                            <label for="editUserName">Новое имя пользователя</label>
+                            <input type="text" class="form-control" id="editUserName" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Подключение Bootstrap и jQuery для работы модального окна -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        const apiBaseUrl = 'http://127.0.0.1:8000';
+
+        // Функция для загрузки пользователей
+        async function fetchUsers() {
+            try {
+                const response = await fetch(`${apiBaseUrl}/users/`);
+                if (!response.ok) throw new Error('Ошибка при загрузке пользователей');
+                
+                const users = await response.json();
+                const userSelect = document.getElementById('existingUser');
+                userSelect.innerHTML = ''; // Очистка списка
+
+                if (users.length === 0) {
+                    userSelect.innerHTML = '<option>Пользователи не найдены</option>';
+                    return;
+                }
+
+                users.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.User_ID;
+                    option.textContent = user.Username;
+                    userSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error(error);
+                alert('Не удалось загрузить пользователей');
+            }
+        }
+
+        // Открытие модального окна для редактирования пользователя
+        document.getElementById('editUserBtn').addEventListener('click', () => {
+            const selectedUserId = document.getElementById('existingUser').value;
+            if (!selectedUserId) {
+                alert('Выберите пользователя для редактирования');
+                return;
+            }
+            $('#editUserModal').modal('show');
+        });
+
+        // Отправка изменений пользователя
+        document.getElementById('editUserForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const userId = document.getElementById('existingUser').value;
+        const newUsername = document.getElementById('editUserName').value.trim();
+
+        if (!newUsername) {
+            alert('Введите новое имя пользователя');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${apiBaseUrl}/users/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json', // Убедитесь, что Content-Type указан как 'application/json'
+                },
+                body: JSON.stringify({ username: newUsername }), // Отправка данных в правильном формате
+            });
+
+            if (!response.ok) throw new Error('Ошибка при обновлении пользователя');
+
+            alert('Пользователь успешно обновлён');
+            $('#editUserModal').modal('hide');
+            fetchUsers(); // Обновить список пользователей
+        } catch (error) {
+            console.error(error);
+            alert('Не удалось обновить пользователя');
+        }
+        });
+
+        document.getElementById('selectUserBtn').addEventListener('click', () => {
+            const userSelect = document.getElementById('existingUser');
+            const selectedUserId = userSelect.value;
+            const selectedUserName = userSelect.options[userSelect.selectedIndex].text;
+
+            // Проверяем, что пользователь выбран
+            if (!selectedUserId) {
+                alert('Выберите пользователя');
+                return;
+            }
+
+        // Устанавливаем никнейм в куки
+        document.cookie = `username=${selectedUserName}; path=/`;
+
+        // Перенаправляем на другую страницу
+        window.location.href = "main.html";
+        });
+
+
+        // Загрузка пользователей при загрузке страницы
+        window.addEventListener('DOMContentLoaded', fetchUsers);
+
+    </script>
+    <!-- Подключение Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+
 </body>
 </html>

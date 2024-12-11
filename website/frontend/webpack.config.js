@@ -3,6 +3,7 @@
 const path = require('path')
 const autoprefixer = require('autoprefixer')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   mode: 'development',
@@ -20,7 +21,12 @@ module.exports = {
     }
   },
   plugins: [
-    new HtmlWebpackPlugin({ template: './src/html/user.html' })
+    new HtmlWebpackPlugin({ template: './src/html/user.html' }),
+    new CopyPlugin({
+      patterns: [
+          { from: 'src/html/main.html', to: 'main.html' }
+      ]
+  })
   ],
   stats: {warnings:false},
   module: {
