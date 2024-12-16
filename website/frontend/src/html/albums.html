@@ -103,6 +103,26 @@
         </div>
     </div>
 
+    <!-- Модальное окно для редактирования жанра -->
+    <div class="modal fade" id="editGenreModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Редактировать жанр</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editGenreId">
+                    <input type="text" id="editGenreTitle" class="form-control mb-2" placeholder="Название жанра" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary" id="saveEditGenreBtn">Сохранить изменения</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Модальное окно для редактирования альбома -->
     <div class="modal fade" id="editModal" tabindex="-1">
         <div class="modal-dialog">
@@ -149,6 +169,7 @@
         let performers = [];
         let genres = [];
         let editAlbumId = null;
+        let editGenreId = null;
 
         // Получение списка альбомов
         async function fetchAlbums() {
@@ -227,6 +248,21 @@
             });
         }
 
+        async function editGenre(id, title) {
+            document.getElementById("editGenreId").value = id;
+            document.getElementById("editGenreTitle").value = title;
+            const editGenreModal = new bootstrap.Modal(document.getElementById('editGenreModal'), {});
+
+            // Закрытие предыдущего модального окна
+            const previousModal = bootstrap.Modal.getInstance(document.getElementById('showModal'));
+            if (previousModal) {
+                previousModal.hide();
+            }
+
+            // Открытие нового модального окна
+            editGenreModal.show();
+        }
+
         // Функция для редактирования альбома
         async function editAlbum(id, title, year, performerId, genreId) {
             // Заполняем форму данными альбома
@@ -285,6 +321,32 @@
             displayGenres(genres);
         })
 
+        document.getElementById("saveEditGenreBtn").addEventListener("click", async () => {
+            const genreId = document.getElementById("editGenreId").value;
+            const title = document.getElementById("editGenreTitle").value;
+            if (!title) {
+                alert("Заполните поле!");
+                return;
+            }
+            try {
+                const response = await fetch(`${genresURL}/${genreId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    Genre_Title: title
+                })
+            });
+            if (response.ok) {
+                    fetchAlbums();
+                    // Закрываем модальное окно
+                    bootstrap.Modal.getInstance(document.getElementById("editGenreModal")).hide();
+                } else {
+                    alert("Ошибка при обновлении жанра.");
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+            }
+        })
         // Сохранение изменений альбома
         document.getElementById("saveEditAlbumBtn").addEventListener("click", async () => {
             const albumId = document.getElementById("editAlbumId").value;
@@ -383,7 +445,7 @@
                                 <p class="mb-0">Жанр: ${genre.Genre_Title}</p>
                             </div>
                             <div>
-                                <button class="btn btn-warning btn-sm me-2" onclick="editGenre(${genre.Genre_ID}, '${genre.Genre_Title}'">
+                                <button class="btn btn-warning btn-sm me-2" onclick="editGenre(${genre.Genre_ID}, '${genre.Genre_Title}')">
                                     <i class="fas fa-edit"></i>
                                 </button>
                                 <button class="btn btn-danger btn-sm" onclick="deleteGenre(${genre.Genre_ID})">
