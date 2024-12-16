@@ -20,7 +20,8 @@ class PerformerCreate(BaseModel):
     Performer_Name: str
 
 class AlbumUpdate(BaseModel):
-    Album_Title: Optional[str] = None
-    Album_Year: Optional[int] = None
-    Performer_FK: Optional[int] = None
-    Genre_FK: Optional[int] = None
+    Album_ID: int
+    Album_Title: str
+    Album_Year: int
+    Performer_FK: int
+    Genre_FK: int

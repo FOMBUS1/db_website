@@ -49,7 +49,7 @@ async def get_all_albums(id: int, db: AsyncSession = Depends(get_db)):
             "Genre_Title": album.genre.Genre_Title
             }
 
-@router.post("/albums/", response_model=dict)
+@router.post("/albums", response_model=dict)
 async def create_new_album(album: AlbumCreate, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Album).filter(Album.Album_Title == album.Album_Title))
     if (len(result.scalars().all()) > 0):

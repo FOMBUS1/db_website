@@ -66,8 +66,16 @@
                 <div class="modal-body">
                     <input type="text" id="newAlbumTitle" class="form-control mb-2" placeholder="Название альбома" required>
                     <input type="number" id="newAlbumYear" class="form-control mb-2" placeholder="Год выпуска" required>
-                    <input type="text" id="newPerformerName" class="form-control mb-2" placeholder="Исполнитель" required>
-                    <input type="text" id="newGenreName" class="form-control mb-2" placeholder="Жанр" required>
+    
+                    <!-- Выпадающий список для исполнителя -->
+                    <select id="newPerformer" class="form-control mb-2" required>
+                        <option value="">Выберите исполнителя</option>
+                    </select>
+    
+                    <!-- Выпадающий список для жанра -->
+                    <select id="newGenre" class="form-control mb-2" required>
+                        <option value="">Выберите жанр</option>
+                    </select>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
@@ -77,13 +85,52 @@
         </div>
     </div>
 
+    <!-- Модальное окно для редактирования альбома -->
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Редактировать альбом</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editAlbumId"> <!-- Скрытый input для хранения ID альбома -->
+                    <input type="text" id="editAlbumTitle" class="form-control mb-2" placeholder="Название альбома" required>
+                    <input type="number" id="editAlbumYear" class="form-control mb-2" placeholder="Год выпуска" required>
+
+                    <!-- Выпадающий список для исполнителя -->
+                    <select id="editPerformer" class="form-control mb-2" required>
+                        <option value="">Выберите исполнителя</option>
+                    </select>
+
+                    <!-- Выпадающий список для жанра -->
+                    <select id="editGenre" class="form-control mb-2" required>
+                        <option value="">Выберите жанр</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary" id="saveEditAlbumBtn">Сохранить изменения</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+
     <!-- Подключение Bootstrap и зависимости -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- JavaScript для работы с API и поиска -->
     <script>
         const apiURL = "http://localhost:8000/albums";
+        const performersURL = "http://localhost:8000/performers";
+        const genresURL = "http://localhost:8000/genres";
+
         let albums = [];
+        let performers = [];
+        let genres = [];
+        let editAlbumId = null;
 
         // Получение списка альбомов
         async function fetchAlbums() {
@@ -95,6 +142,184 @@
                 console.error("Ошибка при получении данных:", error);
             }
         }
+
+        async function fetchPerformers() {
+            try {
+                const response = await fetch("http://localhost:8000/performers");
+                const performers = await response.json();
+                populatePerformers(performers);
+            } catch (error) {
+                console.error("Ошибка при получении исполнителей:", error);
+            }
+        }
+
+        
+        async function fetchGenres() {
+            try {
+                const response = await fetch("http://localhost:8000/genres");
+                const genres = await response.json();
+                populateGenres(genres);
+            } catch (error) {
+                console.error("Ошибка при получении жанров:", error);
+            }
+        }
+
+        function populatePerformers(performers) {
+            const performerSelect = document.getElementById("newPerformer");
+            performers.forEach(performer => {
+                const option = document.createElement("option");
+                option.value = performer.Performer_ID;
+                option.textContent = performer.Performer_Name;
+                performerSelect.appendChild(option);
+            });
+        }
+
+        function populateGenres(genres) {
+            const genreSelect = document.getElementById("newGenre");
+            genres.forEach(genre => {
+                const option = document.createElement("option");
+                option.value = genre.Genre_ID;
+                option.textContent = genre.Genre_Title;
+                genreSelect.appendChild(option);
+            });
+        }
+
+        // Функция для редактирования альбома
+        function editAlbum(id, title, year, performerId, genreId) {
+            // Заполняем форму данными альбома
+            document.getElementById("editAlbumId").value = id;
+            document.getElementById("editAlbumTitle").value = title;
+            document.getElementById("editAlbumYear").value = year;
+
+            // Загружаем список исполнителей и жанров
+            populatePerformersForEdit(performerId);
+            populateGenresForEdit(genreId);
+
+            // Показываем модальное окно редактирования
+            const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+            editModal.show();
+        }
+
+        // Заполнение списка исполнителей для редактирования
+        function populatePerformersForEdit(selectedPerformerId) {
+            const performerSelect = document.getElementById("editPerformer");
+            performerSelect.innerHTML = '<option value="">Выберите исполнителя</option>'; // Очищаем список
+
+            performers.forEach(performer => {
+                const option = document.createElement("option");
+                option.value = performer.Performer_ID;
+                option.textContent = performer.Performer_Name;
+                if (performer.Performer_ID === selectedPerformerId) {
+                    option.selected = true; // Выбираем исполнителя по умолчанию
+                }
+                performerSelect.appendChild(option);
+            });
+        }
+
+        // Заполнение списка жанров для редактирования
+        function populateGenresForEdit(selectedGenreId) {
+            const genreSelect = document.getElementById("editGenre");
+            genreSelect.innerHTML = '<option value="">Выберите жанр</option>'; // Очищаем список
+
+            genres.forEach(genre => {
+                const option = document.createElement("option");
+                option.value = genre.Genre_ID;
+                option.textContent = genre.Genre_Title;
+                if (genre.Genre_ID === selectedGenreId) {
+                    option.selected = true; // Выбираем жанр по умолчанию
+                }
+                genreSelect.appendChild(option);
+            });
+        }
+
+
+        // Сохранение изменений альбома
+        document.getElementById("saveEditAlbumBtn").addEventListener("click", async () => {
+            const albumId = document.getElementById("editAlbumId").value;
+            const title = document.getElementById("editAlbumTitle").value;
+            const year = document.getElementById("editAlbumYear").value;
+            const performerId = document.getElementById("editPerformer").value;
+            const genreId = document.getElementById("editGenre").value;
+
+            if (!title || !year || !performerId || !genreId) {
+                alert("Заполните все поля.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${apiURL}/${albumId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        Album_ID: parseInt(albumId),
+                        Album_Title: title,
+                        Album_Year: parseInt(year),
+                        Performer_FK: parseInt(performerId),  // Используем Performer_FK
+                        Genre_FK: parseInt(genreId)           // Используем Genre_FK
+                    })
+                });
+
+                if (response.ok) {
+                    // Обновляем список альбомов
+                    fetchAlbums();
+                    // Закрываем модальное окно
+                    bootstrap.Modal.getInstance(document.getElementById("editModal")).hide();
+                } else {
+                    alert("Ошибка при обновлении альбома.");
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+            }
+        });
+
+
+
+        // Добавление нового альбома
+        document.getElementById("addAlbumBtn").addEventListener("click", async () => {
+            const title = document.getElementById("newAlbumTitle").value;
+            const year = document.getElementById("newAlbumYear").value;
+            const performerId = document.getElementById("newPerformer").value;  // ID исполнителя
+            const genreId = document.getElementById("newGenre").value;          // ID жанра
+
+            if (!title || !year || !performerId || !genreId) {
+                alert("Заполните все поля.");
+                return;
+            }
+
+            try {
+                const response = await fetch(apiURL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        Album_Title: title,
+                        Album_Year: parseInt(year),
+                        Performer_FK: parseInt(performerId),  // Используем Performer_FK (ID исполнителя)
+                        Genre_FK: parseInt(genreId)           // Используем Genre_FK (ID жанра)
+                    })
+                });
+
+                if (response.ok) {
+                    // Очищаем форму после успешного добавления
+                    document.getElementById("newAlbumTitle").value = "";
+                    document.getElementById("newAlbumYear").value = "";
+                    document.getElementById("newPerformer").value = "";
+                    document.getElementById("newGenre").value = "";
+
+                    // Обновляем список альбомов
+                    fetchAlbums();
+
+                    // Закрываем модальное окно
+                    bootstrap.Modal.getInstance(document.getElementById("addModal")).hide();
+                } else {
+                    alert("Ошибка при добавлении альбома.");
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+            }
+        });
+
+
+
 
         // Отображение альбомов на странице
         function displayAlbums(albumsToDisplay) {
@@ -111,7 +336,7 @@
                             <h5 class="card-title">${album.Album_Title}</h5>
                             <p class="mb-0">Год выпуска: ${album.Album_Year}</p>
                             <p class="mb-0">Исполнитель: ${album.Performer_Name}</p>
-                            <p class="mb-0">Жанр: ${album.Genre_Name || 'Не указан'}</p>
+                            <p class="mb-0">Жанр: ${album.Genre_Title || 'Не указан'}</p>
                         </div>
                         <div>
                             <button class="btn btn-warning btn-sm me-2" onclick="editAlbum(${album.Album_ID}, '${album.Album_Title}', ${album.Album_Year})">
@@ -186,13 +411,18 @@
         function filterAlbums() {
             const searchQuery = document.getElementById("searchInput").value.toLowerCase();
             const filtered = albums.filter(album => 
-                album.Album_Title.toLowerCase().includes(searchQuery)
+                album.Album_Title.toLowerCase().includes(searchQuery) ||
+                album.Performer_Name.toLowerCase().includes(searchQuery) ||
+                (album.Genre_Title && album.Genre_Title.toLowerCase().includes(searchQuery)) ||
+                album.Album_Year.toString().includes(searchQuery)
             );
             displayAlbums(filtered);
         }
 
         // Загрузка альбомов при загрузке страницы
         fetchAlbums();
+        fetchGenres();
+        fetchPerformers();
     </script>
 </body>
 </html>
