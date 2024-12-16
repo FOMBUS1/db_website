@@ -49,6 +49,9 @@
             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal">
                 <i class="fas fa-plus btn-icon"></i>Добавить альбом
             </button>
+            <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#showModal" id="genres">
+                <i class="fas fa-plus btn-icon"></i>Жанры
+            </button>
         </div>
 
         <!-- Список альбомов -->
@@ -80,6 +83,21 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
                     <button type="button" class="btn btn-primary" id="addAlbumBtn">Добавить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="showModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                 <!-- Поиск жанров -->
+                <div class="d-flex justify-content-between mb-3">
+                    <input type="text" id="searchGenreInput" class="form-control me-2" placeholder="Поиск жанров..." oninput="filterGenres()">
+                </div>
+                <div id="genresList"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
                 </div>
             </div>
         </div>
@@ -263,7 +281,9 @@
             });
         }
 
-
+        document.getElementById("genres").addEventListener("click", async () => {
+            displayGenres(genres);
+        })
 
         // Сохранение изменений альбома
         document.getElementById("saveEditAlbumBtn").addEventListener("click", async () => {
@@ -350,8 +370,31 @@
             }
         });
 
+        function displayGenres(genresToDisplay) {
+            const genresList = document.getElementById("genresList");
+            genresList.innerHTML = "";
 
-
+            genresToDisplay.forEach(genre => {
+                const genreCard = document.createElement("div");
+                genreCard.classList.add("card");
+                genreCard.innerHTML = `
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="mb-0">Жанр: ${genre.Genre_Title}</p>
+                            </div>
+                            <div>
+                                <button class="btn btn-warning btn-sm me-2" onclick="editGenre(${genre.Genre_ID}, '${genre.Genre_Title}'">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteGenre(${genre.Genre_ID})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                `
+                genresList.appendChild(genreCard);
+            })
+        }
 
         // Отображение альбомов на странице
         function displayAlbums(albumsToDisplay) {
@@ -449,6 +492,14 @@
                 album.Album_Year.toString().includes(searchQuery)
             );
             displayAlbums(filtered);
+        }
+
+        function filterGenres() {
+            const searchQuery = document.getElementById("searchGenreInput").value.toLowerCase();
+            const filtered = genres.filter(genre => 
+                genre.Genre_Title.toLowerCase().includes(searchQuery)
+            );
+            displayGenres(filtered);
         }
 
         // Загрузка альбомов при загрузке страницы
