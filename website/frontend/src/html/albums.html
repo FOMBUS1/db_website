@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Альбомы</title>
+    
+    <!-- Подключение Bootstrap для стилей -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Подключение Font Awesome для иконок -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .card-title {
+            margin-bottom: 0;
+        }
+        .btn-icon {
+            font-size: 1.2rem;
+            margin-right: 5px;
+        }
+        .modal-header {
+            background-color: #007bff;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2 class="text-center mb-4">Альбомы</h2>
+        
+        <!-- Поиск альбомов -->
+        <div class="d-flex justify-content-between mb-3">
+            <input type="text" id="searchInput" class="form-control me-2" placeholder="Поиск альбома..." oninput="filterAlbums()">
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal">
+                <i class="fas fa-plus btn-icon"></i>Добавить альбом
+            </button>
+        </div>
+
+        <!-- Список альбомов -->
+        <div id="albumsList"></div>
+    </div>
+
+    <!-- Модальное окно для добавления альбома -->
+    <div class="modal fade" id="addModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Добавить альбом</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="newAlbumTitle" class="form-control mb-2" placeholder="Название альбома" required>
+                    <input type="number" id="newAlbumYear" class="form-control mb-2" placeholder="Год выпуска" required>
+                    <input type="text" id="newPerformerName" class="form-control mb-2" placeholder="Исполнитель" required>
+                    <input type="text" id="newGenreName" class="form-control mb-2" placeholder="Жанр" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary" id="addAlbumBtn">Добавить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Подключение Bootstrap и зависимости -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JavaScript для работы с API и поиска -->
+    <script>
+        const apiURL = "http://localhost:8000/albums";
+        let albums = [];
+
+        // Получение списка альбомов
+        async function fetchAlbums() {
+            try {
+                const response = await fetch(apiURL);
+                albums = await response.json();
+                displayAlbums(albums);
+            } catch (error) {
+                console.error("Ошибка при получении данных:", error);
+            }
+        }
+
+        // Отображение альбомов на странице
+        function displayAlbums(albumsToDisplay) {
+            const albumsList = document.getElementById("albumsList");
+            albumsList.innerHTML = "";
+
+            albumsToDisplay.forEach(album => {
+                const albumCard = document.createElement("div");
+                albumCard.classList.add("card");
+
+                albumCard.innerHTML = `
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title">${album.Album_Title}</h5>
+                            <p class="mb-0">Год выпуска: ${album.Album_Year}</p>
+                            <p class="mb-0">Исполнитель: ${album.Performer_Name}</p>
+                            <p class="mb-0">Жанр: ${album.Genre_Name || 'Не указан'}</p>
+                        </div>
+                        <div>
+                            <button class="btn btn-warning btn-sm me-2" onclick="editAlbum(${album.Album_ID}, '${album.Album_Title}', ${album.Album_Year})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteAlbum(${album.Album_ID})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                albumsList.appendChild(albumCard);
+            });
+        }
+
+        // Добавление нового альбома
+        document.getElementById("addAlbumBtn").addEventListener("click", async () => {
+            const title = document.getElementById("newAlbumTitle").value;
+            const year = document.getElementById("newAlbumYear").value;
+            const performer = document.getElementById("newPerformerName").value;
+            const genre = document.getElementById("newGenreName").value;
+
+            if (!title || !year || !performer || !genre) {
+                alert("Заполните все поля.");
+                return;
+            }
+
+            try {
+                const response = await fetch(apiURL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        Album_Title: title,
+                        Album_Year: parseInt(year),
+                        Performer_Name: performer,
+                        Genre_Name: genre
+                    })
+                });
+                if (response.ok) {
+                    document.getElementById("newAlbumTitle").value = "";
+                    document.getElementById("newAlbumYear").value = "";
+                    document.getElementById("newPerformerName").value = "";
+                    document.getElementById("newGenreName").value = "";
+                    fetchAlbums();
+                    bootstrap.Modal.getInstance(document.getElementById("addModal")).hide();
+                } else {
+                    alert("Ошибка при добавлении альбома.");
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+            }
+        });
+
+        // Удаление альбома
+        async function deleteAlbum(id) {
+            if (!confirm("Вы уверены, что хотите удалить этот альбом?")) return;
+
+            try {
+                const response = await fetch(`${apiURL}/${id}`, { method: "DELETE" });
+                if (response.ok) {
+                    fetchAlbums();
+                } else {
+                    alert("Ошибка при удалении альбома.");
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+            }
+        }
+
+        // Фильтрация альбомов по поисковому запросу
+        function filterAlbums() {
+            const searchQuery = document.getElementById("searchInput").value.toLowerCase();
+            const filtered = albums.filter(album => 
+                album.Album_Title.toLowerCase().includes(searchQuery)
+            );
+            displayAlbums(filtered);
+        }
+
+        // Загрузка альбомов при загрузке страницы
+        fetchAlbums();
+    </script>
+</body>
+</html>

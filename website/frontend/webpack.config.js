@@ -24,7 +24,9 @@ module.exports = {
     new HtmlWebpackPlugin({ template: './src/html/user.html' }),
     new CopyPlugin({
       patterns: [
-          { from: 'src/html/main.html', to: 'main.html' }
+          { from: 'src/html/main.html', to: 'main.html' },
+          { from: 'src/html/performers.html', to: 'performers.html'},
+          { from: 'src/html/albums.html', to: 'albums.html'}
       ]
   })
   ],

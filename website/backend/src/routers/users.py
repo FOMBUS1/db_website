@@ -60,8 +60,6 @@ async def update_user(id: int, user_update: UserUpdate, db: AsyncSession = Depen
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Ошибка сервера: {str(e)}")
 
-
-
 # Асинхронный метод для создания нового пользователя
 @router.post("/users/", response_model=dict)
 async def create_new_user(username: str, db: AsyncSession = Depends(get_db)):
