@@ -49,6 +49,9 @@
             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal">
                 <i class="fas fa-plus btn-icon"></i>Добавить альбом
             </button>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#genresModal">
+                <i class="fas fa-cogs btn-icon"></i>Просмотр жанров
+            </button>
         </div>
 
         <!-- Список альбомов -->
@@ -116,6 +119,43 @@
         </div>
     </div>
 
+    <!-- Модальное окно для просмотра и редактирования жанров -->
+    <div class="modal fade" id="genresModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Управление жанрами</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <ul id="genresList" class="list-group">
+                        <!-- Жанры будут отображаться здесь -->
+                    </ul>
+                    <button class="btn btn-success mt-3" data-bs-toggle="modal" data-bs-target="#addGenreModal">Добавить жанр</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для добавления нового жанра -->
+    <div class="modal fade" id="addGenreModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Добавить жанр</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="newGenreName" class="form-control" placeholder="Название жанра" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary" id="addGenreBtn">Добавить жанр</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     
 
     <!-- Подключение Bootstrap и зависимости -->
@@ -164,31 +204,8 @@
             }
         }
 
-        // Получение списка исполнителей и жанров
-        async function fetchPerformers() {
-            try {
-                const response = await fetch("http://localhost:8000/performers");
-                performers = await response.json(); // Сохраняем данные в глобальной переменной
-                populatePerformers();  // Заполняем список исполнителей сразу после загрузки
-            } catch (error) {
-                console.error("Ошибка при получении исполнителей:", error);
-            }
-        }
-
-        async function fetchGenres() {
-            try {
-                const response = await fetch("http://localhost:8000/genres");
-                genres = await response.json(); // Сохраняем данные в глобальной переменной
-                populateGenres();  // Заполняем список жанров сразу после загрузки
-            } catch (error) {
-                console.error("Ошибка при получении жанров:", error);
-            }
-        }
-
-        // Функция для заполнения списка исполнителей для добавления нового альбома
-        function populatePerformers() {
+        function populatePerformers(performers) {
             const performerSelect = document.getElementById("newPerformer");
-            performerSelect.innerHTML = '<option value="">Выберите исполнителя</option>';
             performers.forEach(performer => {
                 const option = document.createElement("option");
                 option.value = performer.Performer_ID;
@@ -197,10 +214,8 @@
             });
         }
 
-        // Функция для заполнения списка жанров для добавления нового альбома
-        function populateGenres() {
+        function populateGenres(genres) {
             const genreSelect = document.getElementById("newGenre");
-            genreSelect.innerHTML = '<option value="">Выберите жанр</option>';
             genres.forEach(genre => {
                 const option = document.createElement("option");
                 option.value = genre.Genre_ID;
@@ -210,19 +225,13 @@
         }
 
         // Функция для редактирования альбома
-        async function editAlbum(id, title, year, performerId, genreId) {
+        function editAlbum(id, title, year, performerId, genreId) {
             // Заполняем форму данными альбома
             document.getElementById("editAlbumId").value = id;
             document.getElementById("editAlbumTitle").value = title;
             document.getElementById("editAlbumYear").value = year;
 
-            // Подождём, пока данные исполнителей и жанров загрузятся
-            if (performers.length === 0 || genres.length === 0) {
-                // Если данные еще не загружены, ждём их загрузки перед заполнением
-                await Promise.all([fetchPerformers(), fetchGenres()]);
-            }
-
-            // Теперь можно заполнять выпадающие списки
+            // Загружаем список исполнителей и жанров
             populatePerformersForEdit(performerId);
             populateGenresForEdit(genreId);
 
@@ -245,7 +254,7 @@
                 }
                 performerSelect.appendChild(option);
             });
-}
+        }
 
         // Заполнение списка жанров для редактирования
         function populateGenresForEdit(selectedGenreId) {
@@ -262,7 +271,6 @@
                 genreSelect.appendChild(option);
             });
         }
-
 
 
         // Сохранение изменений альбома
@@ -350,8 +358,81 @@
             }
         });
 
+        function displayGenres(genresToDisplay) {
+            const genresList = document.getElementById("genresList");
+            genresList.innerHTML = ""; // Очистить список жанров
 
+            genresToDisplay.forEach(genre => {
+                const genreItem = document.createElement("li");
+                genreItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
+                genreItem.innerHTML = `
+                    ${genre.Genre_Title}
+                    <div>
+                        <button class="btn btn-warning btn-sm me-2" onclick="editGenre(${genre.Genre_ID}, '${genre.Genre_Title}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteGenre(${genre.Genre_ID})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                genresList.appendChild(genreItem);
+            });
+        }
 
+        document.getElementById("addGenreBtn").addEventListener("click", async () => {
+            const genreName = document.getElementById("newGenreName").value;
+
+            if (!genreName) {
+                alert("Заполните поле названия жанра.");
+                return;
+            }
+
+            try {
+                const response = await fetch(genresURL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ Genre_Title: genreName })
+                });
+
+                if (response.ok) {
+                    document.getElementById("newGenreName").value = ""; // Очистить поле
+                    fetchGenres(); // Обновить список жанров
+                    bootstrap.Modal.getInstance(document.getElementById("addGenreModal")).hide(); // Закрыть модальное окно
+                } else {
+                    alert("Ошибка при добавлении жанра.");
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+            }
+        });
+
+        function editGenre(id, currentTitle) {
+            const newTitle = prompt("Введите новое название жанра", currentTitle);
+            if (newTitle && newTitle !== currentTitle) {
+                updateGenre(id, newTitle);
+            }
+        }
+
+        async function updateGenre(id, newTitle) {
+            try {
+                const response = await fetch(`${genresURL}/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ Genre_Title: newTitle })
+                });
+
+                if (response.ok) {
+                    fetchGenres(); // Обновить список жанров
+                } else {
+                    alert("Ошибка при обновлении жанра.");
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+            }
+        }
+
+        
 
         // Отображение альбомов на странице
         function displayAlbums(albumsToDisplay) {

@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.exc import SQLAlchemyError
 
-from src.schema import GenreUpdate
+from src.schema import GenreCreate, GenreUpdate
 from src.models.genres import Genre
 from src.database import get_db
 
@@ -18,7 +18,7 @@ async def get_genre(id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Жанр не найден")
     return {"Genre_ID": genre.Genre_ID, "Genre_Title": genre.Genre_Title}
 
-@router.get("/genres/", response_model=list)
+@router.get("/genres", response_model=list)
 async def get_all_genres(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Genre))
     genres = result.scalars().all()
@@ -60,12 +60,13 @@ async def update_genre(id: int, genre_update: GenreUpdate, db: AsyncSession = De
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Ошибка сервера: {str(e)}")
 
-@router.post("/genres/", response_model=dict)
-async def create_new_genre(genre_title: str, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Genre).filter(Genre.Genre_Title == genre_title))
+@router.post("/genres", response_model=dict)
+async def create_new_genre(genre: GenreCreate, db: AsyncSession = Depends(get_db)):
+    print(genre.Genre_Title)
+    result = await db.execute(select(Genre).filter(Genre.Genre_Title == genre.Genre_Title))
     if (len(result.scalars().all()) > 0):
         raise HTTPException(status_code=403, detail="Жанр с таким названием уже существует!")
-    new_genre = Genre(Genre_Title=genre_title)
+    new_genre = Genre(Genre_Title=genre.Genre_Title)
     db.add(new_genre)
     await db.commit()
     await db.refresh(new_genre)
