@@ -97,7 +97,29 @@
                 </div>
                 <div id="genresList"></div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addGenreModal">Добавить жанр</button>
+                </div>
+                <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для добавления жанра -->
+    <div class="modal fade" id="addGenreModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Добавить жанр</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="newGenreTitle" class="form-control mb-2" placeholder="Название жанра" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary" id="addGenreBtn">Добавить</button>
                 </div>
             </div>
         </div>
@@ -386,7 +408,31 @@
             }
         });
 
-
+        document.getElementById("addGenreBtn").addEventListener("click", async () => {
+            const title = document.getElementById("newGenreTitle").value;
+            if(!title) {
+                alert("Заполните поле!");
+                return;
+            }
+            try {
+                const response = await fetch(genresURL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        Genre_Title: title
+                    })
+                });
+                if (response.ok) {
+                    document.getElementById("newGenreTitle").value = "";
+                    fetchGenres();
+                    bootstrap.Modal.getInstance(document.getElementById("addGenreModal")).hide();
+                } else {
+                    alert("Ошибка при добавлении альбома.");
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+            }
+        })
 
         // Добавление нового альбома
         document.getElementById("addAlbumBtn").addEventListener("click", async () => {
@@ -410,7 +456,9 @@
                         Performer_FK: parseInt(performerId),  // Используем Performer_FK (ID исполнителя)
                         Genre_FK: parseInt(genreId)           // Используем Genre_FK (ID жанра)
                     })
+                    
                 });
+                
 
                 if (response.ok) {
                     // Очищаем форму после успешного добавления
@@ -527,6 +575,38 @@
                 console.error("Ошибка:", error);
             }
         });
+        
+        async function deleteEdit(id) {
+            if(!confirm("Вы уверены, что хотите удалить этот жанр?")) return;
+
+            try {
+                const response = await fetch(`${genresURL}/${id}`, { method: "DELETE" });
+                if (response.ok) {
+                    fetchAlbums();
+                } else {
+                    alert("Ошибка при удалении альбома.");
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+            }
+        }
+
+        async function deleteGenre(id) {
+            if(!confirm("Вы уверены, что хотите удалить этот альбом?")) return;
+
+            try {
+                const response = await fetch(`${genresURL}/${id}`, { method: "DELETE" });
+                if (response.ok) {
+                    fetchGenres();
+                    bootstrap.Modal.getInstance(document.getElementById("showModal")).hide();
+                } else {
+                    alert("Ошибка при удалении альбома.");
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+            }
+        }
+
 
         // Удаление альбома
         async function deleteAlbum(id) {

@@ -4,7 +4,7 @@ from sqlalchemy.future import select
 from sqlalchemy.exc import SQLAlchemyError
 
 from src.schema import GenreCreate, GenreUpdate
-from src.models.genres import Genre
+from src.models.tables import Genre
 from src.database import get_db
 
 router = APIRouter()

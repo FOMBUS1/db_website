@@ -29,3 +29,19 @@ class AlbumUpdate(BaseModel):
     Album_Year: int
     Performer_FK: int
     Genre_FK: int
+
+class TrackCreate(BaseModel):
+    Track_Title: str
+    Album_FK: int
+    Playlist_FK: Optional[int] = None
+    MoodTag_FK: int
+    ActionTag_FK: int
+    Duration: int
+
+class TrackUpdate(BaseModel):
+    Track_Title: str
+    Album_FK: int
+    Playlist_FK: Optional[int] = None
+    MoodTag_FK: int
+    ActionTag_FK: int
+    Duration: int

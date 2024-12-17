@@ -1,19 +1,18 @@
-from base import Base
-from albums import Album
-from genres import Genre
-from users import User
-from performers import Performer
+from src.models.base import Base
+
+from src.models.tables import *
+
 from sqlalchemy import create_engine
-from sqlalchemy.orm import registry
+from sqlalchemy.orm import registry, relationship
 
 # Подключение к базе данных PostgreSQL
 DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/audio_db"
 
-engine = create_engine(DATABASE_URL)
+engine = create_engine(DATABASE_URL, echo=True)
 
 # Создание таблицы в базе данных
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
     mapper_registry = registry()
     mapper_registry.configure()
-    print("Таблица Albums успешно создана.")
+    print("Все таблицы успешно созданы.")
