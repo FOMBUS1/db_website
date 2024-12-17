@@ -1,3 +1,8 @@
 venv/*
+<<<<<<< Updated upstream
 __pycache__/
 *.so
+=======
+*.pyc
+__pycache__/*
+>>>>>>> Stashed changes

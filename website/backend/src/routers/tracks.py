@@ -16,6 +16,7 @@ async def get_all_tracks(db: AsyncSession = Depends(get_db)):
                     .options(joinedload(Track.album))
                     .options(joinedload(Track.moodTag))
                     .options(joinedload(Track.actionTag)) 
+                
             )
     
     result = await db.execute(query)
