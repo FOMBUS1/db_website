@@ -26,7 +26,8 @@ module.exports = {
       patterns: [
           { from: 'src/html/main.html', to: 'main.html' },
           { from: 'src/html/performers.html', to: 'performers.html'},
-          { from: 'src/html/albums.html', to: 'albums.html'}
+          { from: 'src/html/albums.html', to: 'albums.html'},
+          { from: 'src/html/tracks.html', to: 'tracks.html'}
       ]
   })
   ],
