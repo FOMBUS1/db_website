@@ -65,6 +65,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
+                    <input type="hidden" id="editTrackID">
                     <input type="text" id="newTrackTitle" class="form-control mb-2" placeholder="Название трека" required>
     
                     <!-- Выпадающий список для альбомов -->
@@ -122,7 +123,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                    <button type="button" class="btn btn-primary" id="saveEditAlbumBtn">Сохранить изменения</button>
+                    <button type="button" class="btn btn-primary" id="saveEditTrackBtn">Сохранить изменения</button>
                 </div>
             </div>
         </div>
@@ -140,6 +141,131 @@
         let moodTags = [];
         let actionTags = [];
 
+        let editTrackId = null;
+
+        async function deleteTrack(id) {
+            if (!confirm("Вы уверены, что хотите удалить этот трек?")) return;
+
+            try {
+                const response = await fetch(`${apiURL}/${id}`, { method: "DELETE" });
+                if (response.ok) {
+                    fetchTracks();
+                } else {
+                    alert("Ошибка при удалении трека.");
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+            }
+        }
+
+        async function editTrack(id, title, AlbumFK, MoodTagFK, ActionTagFK, Duration) {
+            // Заполняем форму данными альбома
+            document.getElementById("editTrackID").value = id;
+            document.getElementById("editTrackTitle").value = title;
+            document.getElementById("editTrackDuration").value = Duration;
+
+            // Подождём, пока данные исполнителей и жанров загрузятся
+            if (moodTags.length === 0 || actionTags.length === 0 || albums.length == 0) {
+                // Если данные еще не загружены, ждём их загрузки перед заполнением
+                await Promise.all([fetchMoodTags(), fetchActionTags(), fetchAlbums()]);
+            }
+
+            // Теперь можно заполнять выпадающие списки
+            populateMoodTagsForEdit(MoodTagFK);
+            populateActionTagsForEdit(ActionTagFK);
+            populateAlbumsForEdit(AlbumFK);
+
+            // Показываем модальное окно редактирования
+            const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+            editModal.show();
+        }
+
+         // Сохранение изменений альбома
+         document.getElementById("saveEditTrackBtn").addEventListener("click", async () => {
+            const trackID = document.getElementById("editTrackID").value;
+            const title = document.getElementById("editTrackTitle").value;
+            const albumFK = document.getElementById("editAlbum").value;
+            const moodTagFK = document.getElementById("editMoodTag").value;
+            const actionTagFK = document.getElementById("editActionTag").value;
+            const duration = document.getElementById("editTrackDuration").value;
+
+            if (!title || !albumFK || !moodTagFK || !actionTagFK || !duration) {
+                alert("Заполните все поля.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${apiURL}/${trackID}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        Track_Title: title,
+                        Album_FK: albumFK,
+                        MoodTag_FK: moodTagFK,
+                        ActionTag_FK: actionTagFK,
+                        Duration: duration
+                    })
+                });
+
+                if (response.ok) {
+                    // Обновляем список альбомов
+                    fetchTracks();
+                    // Закрываем модальное окно
+                    bootstrap.Modal.getInstance(document.getElementById("editModal")).hide();
+                } else {
+                    alert("Ошибка при обновлении трека.");
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+            }
+        });
+
+
+        function populateMoodTagsForEdit(selectedMoodTagId) {
+            const moodTagSelect = document.getElementById("editMoodTag");
+            moodTagSelect.innerHTML = '<option value="">Выберите тег настроения</option>'; // Очищаем список
+
+            moodTags.forEach(moodTag => {
+                const option = document.createElement("option");
+                option.value = moodTag.MoodTag_ID;
+                option.textContent = moodTag.MoodTag_Title;
+                if (moodTag.MoodTag_ID === selectedMoodTagId) {
+                    option.selected = true;
+                }
+                moodTagSelect.appendChild(option);
+            });
+        }  
+
+        function populateActionTagsForEdit(selectedActionTagId) {
+            const actionTagSelect = document.getElementById("editActionTag");
+            actionTagSelect.innerHTML = '<option value="">Выберите тег действия</option>'; // Очищаем список
+
+            actionTags.forEach(actionTag => {
+                const option = document.createElement("option");
+                option.value = actionTag.ActionTag_ID;
+                option.textContent = actionTag.ActionTag_Title;
+                if (actionTag.ActionTag_ID === selectedActionTagId) {
+                    option.selected = true;
+                }
+                actionTagSelect.appendChild(option);
+            });
+        }  
+
+        function populateAlbumsForEdit(selectedAlbumsId) {
+            const albumSelect = document.getElementById("editAlbum");
+            albumSelect.innerHTML = '<option value="">Выберите альбом</option>'; // Очищаем список
+
+            albums.forEach(album => {
+                const option = document.createElement("option");
+                option.value = album.Album_ID;
+                option.textContent = album.Album_Title;
+                if (album.Album_ID === selectedAlbumsId) {
+                    option.selected = true;
+                }
+                albumSelect.appendChild(option);
+            });
+        }  
+
         // Добавление нового альбома
         document.getElementById("addTrackBtn").addEventListener("click", async () => {
             const title = document.getElementById("newTrackTitle").value;
@@ -152,7 +278,6 @@
                 alert("Заполните все поля.");
                 return;
             }
-
             try {
                 const response = await fetch(apiURL, {
                     method: "POST",
@@ -226,7 +351,7 @@
             moodTagSelect.innerHTML = '<option value="">Выберите тег настроения</option>';
             moodTags.forEach(moodTag => {
                 const option = document.createElement("option");
-                option.value = moodTag.moodTag_ID;
+                option.value = moodTag.MoodTag_ID;
                 option.textContent = moodTag.MoodTag_Title;
                 moodTagSelect.appendChild(option);
             });
@@ -285,10 +410,10 @@
                         </div>
                          <div>
                             <button class="btn btn-warning btn-sm me-2" onclick="editTrack(${track.Track_ID},
-                                     '${track.Track_Title}', 
+                                    '${track.Track_Title}', 
                                      ${track.Album_FK}, 
-                                     ${track.moodTag_FK},
-                                     ${track.actionTag_FK},
+                                     ${track.MoodTag_FK},
+                                     ${track.ActionTag_FK},
                                      ${track.Duration})">
                                 <i class="fas fa-edit"></i>
                             </button>

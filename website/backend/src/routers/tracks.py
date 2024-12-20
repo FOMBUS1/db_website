@@ -27,6 +27,9 @@ async def get_all_tracks(db: AsyncSession = Depends(get_db)):
             "Track_ID": track.Track_ID,
             "Track_Title": track.Track_Title,
             "Duration": track.Duration,
+            "MoodTag_FK": track.MoodTag_FK,
+            "ActionTag_FK": track.ActionTag_FK,
+            "Album_FK": track.Album_FK,
             "MoodTag_Title": track.moodTag.MoodTag_Title if track.moodTag is not None else None,
             "ActionTag_Title": track.actionTag.ActionTag_Title if track.actionTag is not None else None,
             "Album_Title": track.album.Album_Title if track.album else None
@@ -113,7 +116,7 @@ async def update_album(id: int, track_update: TrackUpdate, db: AsyncSession = De
 
         return {"message": "Трек успешно обновлён",
             "Track_Title": track.Track_Title,
-            "Album_FK": track.Track_FK,
+            "Album_FK": track.Album_FK,
             "Playlist_FK": track.Playlist_FK,
             "MoodTag_FK": track.MoodTag_FK,
             "ActionTag_FK": track.ActionTag_FK,
