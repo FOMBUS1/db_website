@@ -75,17 +75,19 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
-        const apiBaseUrl = 'http://127.0.0.1:8000';
+        const apiBaseUrl = 'http://localhost:8000';
 
         // Функция для загрузки пользователей
         async function fetchUsers() {
             try {
-                const response = await fetch(`${apiBaseUrl}/users/`);
+                const response = await fetch(`${apiBaseUrl}/users`, {
+                    method: "GET",
+            });
                 if (!response.ok) throw new Error('Ошибка при загрузке пользователей');
                 
                 const users = await response.json();
                 const userSelect = document.getElementById('existingUser');
-                userSelect.innerHTML = ''; // Очистка списка
+                userSelect.innerHTML = ''; 
 
                 if (users.length === 0) {
                     userSelect.innerHTML = '<option>Пользователи не найдены</option>';

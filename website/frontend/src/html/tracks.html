@@ -57,11 +57,129 @@
         <div id="tracksList"></div>
     </div>
 
+    <div class="modal fade" id="addModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Добавить трек</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="newTrackTitle" class="form-control mb-2" placeholder="Название трека" required>
+    
+                    <!-- Выпадающий список для альбомов -->
+                    <select id="newAlbum" class="form-control mb-2" required>
+                        <option value="">Выберите альбом</option>
+                    </select>
+    
+                    <!-- Выпадающий список для тега настроения -->
+                    <select id="newMoodTag" class="form-control mb-2" required>
+                        <option value="">Выберите тег настроения</option>
+                    </select>
+
+                    <!-- Выпадающий список для тега действия -->
+                    <select id="newActionTag" class="form-control mb-2" required>
+                        <option value="">Выберите тег действия</option>
+                    </select>
+
+                    <input type="text" id="newTrackDuration" class="form-control mb-2" placeholder="Длительность" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary" id="addTrackBtn">Добавить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Редактировать трек</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editTrackId"> <!-- Скрытый input для хранения ID трека -->
+                    <input type="text" id="editTrackTitle" class="form-control mb-2" placeholder="Название трека" required>
+                    
+                    <!-- Выпадающий список для альбомов -->
+                    <select id="editAlbum" class="form-control mb-2" required>
+                        <option value="">Выберите альбом</option>
+                    </select>
+    
+                    <!-- Выпадающий список для тега настроения -->
+                    <select id="editMoodTag" class="form-control mb-2" required>
+                        <option value="">Выберите тег настроения</option>
+                    </select>
+
+                    <!-- Выпадающий список для тега действия -->
+                    <select id="editActionTag" class="form-control mb-2" required>
+                        <option value="">Выберите тег действия</option>
+                    </select>
+
+                    <input type="text" id="editTrackDuration" class="form-control mb-2" placeholder="Длительность" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary" id="saveEditAlbumBtn">Сохранить изменения</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         const apiURL = "http://localhost:8000/tracks";
+        const albumURL = "http://localhost:8000/albums";
+        const moodTagsURL = "http://localhost:8000/moodTags";
+        const actionTagsURL = "http://localhost:8000/actionTags";
         let tracks = [];
+        let albums = [];
+        let moodTags = [];
+        let actionTags = [];
+
+        // Добавление нового альбома
+        document.getElementById("addTrackBtn").addEventListener("click", async () => {
+            const title = document.getElementById("newTrackTitle").value;
+            const albumFK = document.getElementById("newAlbum").value;
+            const moodTagFK = document.getElementById("newMoodTag").value;
+            const actionTagFK = document.getElementById("newActionTag").value;
+            const duration = document.getElementById("newTrackDuration").value;
+
+            if (!title || !albumFK || !moodTagFK || !actionTagFK || !duration) {
+                alert("Заполните все поля.");
+                return;
+            }
+
+            try {
+                const response = await fetch(apiURL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        Track_Title: title,
+                        Album_FK: albumFK,
+                        MoodTag_FK: moodTagFK,
+                        ActionTag_FK: actionTagFK,
+                        Duration: duration
+                    })
+                });
+                if (response.ok) {
+                    document.getElementById("newTrackTitle").value = "";
+                    document.getElementById("newAlbum").value = "";
+                    document.getElementById("newMoodTag").value = "";
+                    document.getElementById("newActionTag").value = "";
+                    document.getElementById("newTrackDuration").value = "";
+                    fetchTracks();
+                    bootstrap.Modal.getInstance(document.getElementById("addModal")).hide();
+                } else {
+                    alert("Ошибка при добавлении трека.");
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+            }
+        });
 
         async function fetchTracks() {
             try {
@@ -71,6 +189,81 @@
             } catch (error) {
                 console.error("Ошибка при получении данных:", error);
             }
+        }
+
+        async function fetchAlbums() {
+            try {
+                const response = await fetch(albumURL);
+                albums = await response.json();
+                populateAlbums(albums);
+            } catch (error) {
+                console.error("Ошибка при получении данных:", error);
+            }
+        }
+
+        async function fetchMoodTags() {
+            try {
+                const response = await fetch(moodTagsURL);
+                moodTags = await response.json();
+                populateMoodTags(); 
+            } catch (error) {
+                console.error("Ошибка при получении moodTags:", error);
+            }
+        }
+
+        async function fetchActionTags() {
+            try {
+                const response = await fetch(actionTagsURL);
+                actionTags = await response.json();
+                populateActionTags(); 
+            } catch (error) {
+                console.error("Ошибка при получении actionTags:", error);
+            }
+        }
+
+        function populateMoodTags() {
+            const moodTagSelect = document.getElementById("newMoodTag");
+            moodTagSelect.innerHTML = '<option value="">Выберите тег настроения</option>';
+            moodTags.forEach(moodTag => {
+                const option = document.createElement("option");
+                option.value = moodTag.moodTag_ID;
+                option.textContent = moodTag.MoodTag_Title;
+                moodTagSelect.appendChild(option);
+            });
+        }
+
+        function populateActionTags() {
+            const actionTagSelect = document.getElementById("newActionTag");
+            actionTagSelect.innerHTML = '<option value="">Выберите тег действия</option>';
+            actionTags.forEach(actionTag => {
+                const option = document.createElement("option");
+                option.value = actionTag.ActionTag_ID;
+                option.textContent = actionTag.ActionTag_Title;
+                actionTagSelect.appendChild(option);
+            });
+        }
+
+        function populateAlbums() {
+            const albumSelect = document.getElementById("newAlbum");
+            albumSelect.innerHTML = '<option value="">Выберите альбом</option>';
+            albums.forEach(album => {
+                const option = document.createElement("option");
+                option.value = album.Album_ID;
+                option.textContent = album.Album_Title;
+                albumSelect.appendChild(option);
+            });
+        }
+
+        function filterTracks() {
+            const searchQuery = document.getElementById("searchInput").value.toLowerCase();
+            const filtered = tracks.filter(track => 
+                track.Track_Title.toLowerCase().includes(searchQuery) ||
+                track.Album_Title.toLowerCase().includes(searchQuery) ||
+                (track.MoodTag_Title && track.MoodTag_Title.toLowerCase().includes(searchQuery)) ||
+                (track.ActionTag_Title && track.ActionTag_Title.toLowerCase().includes(searchQuery)) ||
+                track.Duration.toString().includes(searchQuery)
+            );
+            displayTracks(filtered);
         }
 
         function displayTracks(tracksToDisplay) {
@@ -90,6 +283,19 @@
                             <p class="mb-0">Действие: ${track.ActionTag_Title}</p>
                             <p class="mb-0">Длительность: ${track.Duration}</p>
                         </div>
+                         <div>
+                            <button class="btn btn-warning btn-sm me-2" onclick="editTrack(${track.Track_ID},
+                                     '${track.Track_Title}', 
+                                     ${track.Album_FK}, 
+                                     ${track.moodTag_FK},
+                                     ${track.actionTag_FK},
+                                     ${track.Duration})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteTrack(${track.Track_ID})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </div>
                 `;
 
@@ -98,5 +304,8 @@
         }
 
         fetchTracks();
+        fetchAlbums();
+        fetchMoodTags();
+        fetchActionTags();
     </script>
 </body>

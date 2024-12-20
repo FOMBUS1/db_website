@@ -17,6 +17,18 @@ class GenreCreate(BaseModel):
 class GenreUpdate(BaseModel):
     Genre_Title: str
 
+class MoodTagCreate(BaseModel):
+    MoodTag_Title: str
+
+class MoodTagUpdate(BaseModel):
+    MoodTag_Title: str
+
+class ActionTagCreate(BaseModel):
+    ActionTag_Title: str
+
+class ActionTagUpdate(BaseModel):
+    ActionTag_Title: str
+
 class AlbumCreate(BaseModel):
     Album_Title: str
     Album_Year: int

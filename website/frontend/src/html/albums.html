@@ -204,31 +204,10 @@
             }
         }
 
-        async function fetchPerformers() {
-            try {
-                const response = await fetch("http://localhost:8000/performers");
-                const performers = await response.json();
-                populatePerformers(performers);
-            } catch (error) {
-                console.error("Ошибка при получении исполнителей:", error);
-            }
-        }
-
-        
-        async function fetchGenres() {
-            try {
-                const response = await fetch("http://localhost:8000/genres");
-                const genres = await response.json();
-                populateGenres(genres);
-            } catch (error) {
-                console.error("Ошибка при получении жанров:", error);
-            }
-        }
-
         // Получение списка исполнителей и жанров
         async function fetchPerformers() {
             try {
-                const response = await fetch("http://localhost:8000/performers");
+                const response = await fetch(performersURL);
                 performers = await response.json(); // Сохраняем данные в глобальной переменной
                 populatePerformers();  // Заполняем список исполнителей сразу после загрузки
             } catch (error) {
@@ -238,7 +217,7 @@
 
         async function fetchGenres() {
             try {
-                const response = await fetch("http://localhost:8000/genres");
+                const response = await fetch(genresURL);
                 genres = await response.json(); // Сохраняем данные в глобальной переменной
                 populateGenres();  // Заполняем список жанров сразу после загрузки
             } catch (error) {

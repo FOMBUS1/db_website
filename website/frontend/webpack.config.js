@@ -14,11 +14,19 @@ module.exports = {
   },
   devServer: {
     static: path.resolve(__dirname, 'dist'),
+    host: '0.0.0.0',
     port: 8080,
+    open: true,
     hot: true, 
     client: {
-      overlay: false
-    }
+      overlay: false,
+      webSocketURL: {
+        hostname: 'react-tunnel.ngrok.io',
+        port: 0,
+        protocol: 'wss',
+      },
+    },
+    allowedHosts: 'all',
   },
   plugins: [
     new HtmlWebpackPlugin({ template: './src/html/user.html' }),
