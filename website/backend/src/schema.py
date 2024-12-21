@@ -1,8 +1,11 @@
 from pydantic import BaseModel
 from typing import Optional
 
+class UserCreate(BaseModel):
+    Username: str
+
 class UserUpdate(BaseModel):
-    username: str
+    Username: str
 
 class PerformerCreate(BaseModel):
     Performer_Name: str
@@ -45,7 +48,6 @@ class AlbumUpdate(BaseModel):
 class TrackCreate(BaseModel):
     Track_Title: str
     Album_FK: int
-    Playlist_FK: Optional[int] = None
     MoodTag_FK: int
     ActionTag_FK: int
     Duration: int
@@ -53,7 +55,13 @@ class TrackCreate(BaseModel):
 class TrackUpdate(BaseModel):
     Track_Title: str
     Album_FK: int
-    Playlist_FK: Optional[int] = None
     MoodTag_FK: int
     ActionTag_FK: int
     Duration: int
+
+class PlaylistCreate(BaseModel):
+    Playlist_Title: str
+    User_FK: int
+
+class PlaylistUpdate(BaseModel):
+    Playlist_Title: str

@@ -8,6 +8,8 @@ from src.routers.genres import router as router_genres
 from src.routers.tracks import router as router_tracks
 from src.routers.moodtags import router as router_moodtags
 from src.routers.actiontags import router as router_actiontags
+from src.routers.playlists import router as router_playlists
+
 import src.models.create_models
 
 import uvicorn
@@ -29,6 +31,7 @@ app.include_router(router_genres)
 app.include_router(router_tracks)
 app.include_router(router_moodtags)
 app.include_router(router_actiontags)
+app.include_router(router_playlists)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

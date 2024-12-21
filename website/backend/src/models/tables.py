@@ -69,7 +69,6 @@ class Track(Base):
     Track_ID = mapped_column(Integer, primary_key=True, autoincrement=True)
     Track_Title = mapped_column(String, nullable=False)
     Album_FK = mapped_column(Integer, ForeignKey("Albums.Album_ID"))
-    Playlist_FK = mapped_column(Integer, ForeignKey("Playlists.Playlist_ID"), nullable=True)
     MoodTag_FK = mapped_column(Integer, ForeignKey("MoodTags.MoodTag_ID"))
     ActionTag_FK = mapped_column(Integer, ForeignKey("ActionTags.ActionTag_ID"))
     Duration = mapped_column(Integer, nullable=False)
@@ -79,13 +78,13 @@ class Track(Base):
     moodTag = relationship("MoodTag", back_populates="tracks", lazy="selectin")
     album = relationship("Album", back_populates="tracks")
 
+
 class Playlist(Base):
     __tablename__ = 'Playlists'
 
     Playlist_ID = mapped_column(Integer, primary_key=True, autoincrement=True)
     Playlist_Title = mapped_column(String, nullable=False)
     User_FK = mapped_column(Integer, ForeignKey("Users.User_ID"))
-    Track_FK = mapped_column(Integer, ForeignKey("Tracks.Track_ID"))
-
+    
     user = relationship("User", back_populates="playlists", lazy="selectin")
     tracks = relationship("Track", secondary="playlist_track", back_populates="playlists", lazy="selectin")

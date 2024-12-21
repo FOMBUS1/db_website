@@ -48,13 +48,124 @@
             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal">
                 <i class="fas fa-plus btn-icon"></i>Добавить трек
             </button>
-            <!-- <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#showModal" id="genres">
-                <i class="fas fa-plus btn-icon"></i>Жанры
-            </button> -->
+            <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#showMoodTag" id="moodTags">
+                <i class="fas fa-plus btn-icon"></i>Теги настроения
+            </button>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#showActionTag" id="actionTags">
+                <i class="fas fa-plus btn-icon"></i>Теги действий
+            </button>
         </div>
 
-        <!-- Список альбомов -->
+        <!-- Список треков -->
         <div id="tracksList"></div>
+    </div>
+
+    <div class="modal fade" id="addMoodTagModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Добавить тег</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="newMoodTagTitle" class="form-control mb-2" placeholder="Название тега" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary" id="addMoodTagBtn">Добавить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addActionTagModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Добавить тег</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="newActionTagTitle" class="form-control mb-2" placeholder="Название тега" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary" id="addActionTagBtn">Добавить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="showMoodTag" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="d-flex justify-content-between mb-3">
+                    <input type="text" id="searchMoodTagInput" class="form-control me-2" placeholder="Поиск тегов..." oninput="filterMoodTags()">
+                </div>
+                <div id="moodTagsList"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addMoodTagModal">Добавить тег настроения</button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="showActionTag" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="d-flex justify-content-between mb-3">
+                    <input type="text" id="searchActionTagInput" class="form-control me-2" placeholder="Поиск тегов..." oninput="filterActionTags()">
+                </div>
+                <div id="actionTagsList"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addActionTagModal">Добавить тег действия</button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editMoodTagModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Редактировать тег</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editMoodTagId">
+                    <input type="text" id="editMoodTagTitle" class="form-control mb-2" placeholder="Название тега" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary" id="saveEditMoodTagBtn">Сохранить изменения</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editActionTagModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Редактировать тег</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editActionTagId">
+                    <input type="text" id="editActionTagTitle" class="form-control mb-2" placeholder="Название тега" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary" id="saveEditActionTagBtn">Сохранить изменения</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="modal fade" id="addModal" tabindex="-1">
@@ -142,6 +253,14 @@
         let actionTags = [];
 
         let editTrackId = null;
+
+        document.getElementById("moodTags").addEventListener("click", async () => {
+            displayMoodTags(moodTags);
+        })
+
+        document.getElementById("actionTags").addEventListener("click", async () => {
+            displayActionTags(actionTags);
+        })
 
         async function deleteTrack(id) {
             if (!confirm("Вы уверены, что хотите удалить этот трек?")) return;
@@ -427,6 +546,226 @@
                 tracksList.appendChild(trackCard);
             });
         }
+
+        function displayMoodTags(moodTagsToDisplay) {
+            const moodTagList = document.getElementById("moodTagsList");
+            moodTagList.innerHTML = "";
+
+            moodTagsToDisplay.forEach(moodTag => {
+                const moodTagCard = document.createElement("div");
+                moodTagCard.classList.add("card");
+                moodTagCard.innerHTML = `
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="mb-0">Тег: ${moodTag.MoodTag_Title}</p>
+                            </div>
+                            <div>
+                                <button class="btn btn-warning btn-sm me-2" onclick="editMoodTag(${moodTag.MoodTag_ID}, '${moodTag.MoodTag_Title}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteMoodTag(${moodTag.MoodTag_ID})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                `
+                moodTagList.appendChild(moodTagCard);
+            })
+        }
+
+        async function editMoodTag(id, title) {
+            document.getElementById("editMoodTagId").value = id;
+            document.getElementById("editMoodTagTitle").value = title;
+            const editMoodTagModal = new bootstrap.Modal(document.getElementById('editMoodTagModal'), {});
+
+            // Закрытие предыдущего модального окна
+            const previousModal = bootstrap.Modal.getInstance(document.getElementById('addMoodTagModal'));
+            if (previousModal) {
+                previousModal.hide();
+            }
+
+            // Открытие нового модального окна
+            editMoodTagModal.show();
+        }
+
+        async function editActionTag(id, title) {
+            document.getElementById("editActionTagId").value = id;
+            document.getElementById("editActionTagTitle").value = title;
+            const editActionTagModal = new bootstrap.Modal(document.getElementById('editActionTagModal'), {});
+
+            // Закрытие предыдущего модального окна
+            const previousModal = bootstrap.Modal.getInstance(document.getElementById('addActionTagModal'));
+            if (previousModal) {
+                previousModal.hide();
+            }
+
+            // Открытие нового модального окна
+            editActionTagModal.show();
+        }
+
+        function displayActionTags(actionTagsToDisplay) {
+            const actionTagList = document.getElementById("actionTagsList");
+            actionTagList.innerHTML = "";
+
+            actionTagsToDisplay.forEach(actionTag => {
+                const actionTagCard = document.createElement("div");
+                actionTagCard.classList.add("card");
+                actionTagCard.innerHTML = `
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="mb-0">Тег: ${actionTag.ActionTag_Title}</p>
+                            </div>
+                            <div>
+                                <button class="btn btn-warning btn-sm me-2" onclick="editActionTag(${actionTag.ActionTag_ID}, '${actionTag.ActionTag_Title}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteActionTag(${actionTag.ActionTag_ID})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        `
+                actionTagList.appendChild(actionTagCard);
+                })
+        }
+
+        async function deleteMoodTag(id) {
+            if(!confirm("Вы уверены, что хотите удалить этот тег?")) return;
+
+            try {
+                const response = await fetch(`${moodTagsURL}/${id}`, { method: "DELETE" });
+                if (response.ok) {
+                    fetchMoodTags();
+                    bootstrap.Modal.getInstance(document.getElementById("showMoodTag")).hide();
+                } else {
+                    alert("Ошибка при удалении тега.");
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+            }
+        }
+
+        async function deleteActionTag(id) {
+            if(!confirm("Вы уверены, что хотите удалить этот тег?")) return;
+
+            try {
+                const response = await fetch(`${actionTagsURL}/${id}`, { method: "DELETE" });
+                if (response.ok) {
+                    fetchActionTags();
+                    bootstrap.Modal.getInstance(document.getElementById("showActionTag")).hide();
+                } else {
+                    alert("Ошибка при удалении тега.");
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+            }
+        }
+
+        document.getElementById("addMoodTagBtn").addEventListener("click", async () => {
+            const title = document.getElementById("newMoodTagTitle").value;
+            if(!title) {
+                alert("Заполните поле!");
+                return;
+            }
+            try {
+                const response = await fetch(moodTagsURL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        MoodTag_Title: title
+                    })
+                });
+                if (response.ok) {
+                    document.getElementById("newMoodTagTitle").value = "";
+                    fetchTracks();
+                    bootstrap.Modal.getInstance(document.getElementById("addMoodTagModal")).hide();
+                } else {
+                    alert("Ошибка при добавлении тега.");
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+            }
+        })
+
+        document.getElementById("addActionTagBtn").addEventListener("click", async () => {
+            const title = document.getElementById("newActionTagTitle").value;
+            if(!title) {
+                alert("Заполните поле!");
+                return;
+            }
+            try {
+                const response = await fetch(actionTagsURL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        ActionTag_Title: title
+                    })
+                });
+                if (response.ok) {
+                    document.getElementById("newActionTagTitle").value = "";
+                    fetchTracks();
+                    bootstrap.Modal.getInstance(document.getElementById("addActionTagModal")).hide();
+                } else {
+                    alert("Ошибка при добавлении тега.");
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+            }
+        })
+
+        document.getElementById("saveEditMoodTagBtn").addEventListener("click", async () => {
+            const moodTagId = document.getElementById("editMoodTagId").value;
+            const title = document.getElementById("editMoodTagTitle").value;
+            if (!title) {
+                alert("Заполните поле!");
+                return;
+            }
+            try {
+                const response = await fetch(`${moodTagsURL}/${moodTagId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    MoodTag_Title: title
+                })
+            });
+            if (response.ok) {
+                    fetchMoodTags();
+                    // Закрываем модальное окно
+                    bootstrap.Modal.getInstance(document.getElementById("editMoodTagModal")).hide();
+                } else {
+                    alert("Ошибка при обновлении жанра.");
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+            }
+        })
+
+        document.getElementById("saveEditActionTagBtn").addEventListener("click", async () => {
+            const actionTagId = document.getElementById("editActionTagId").value;
+            const title = document.getElementById("editActionTagTitle").value;
+            if (!title) {
+                alert("Заполните поле!");
+                return;
+            }
+            try {
+                const response = await fetch(`${actionTagsURL}/${actionTagId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    ActionTag_Title: title
+                })
+            });
+            if (response.ok) {
+                    fetchActionTags();
+                    // Закрываем модальное окно
+                    bootstrap.Modal.getInstance(document.getElementById("editActionTagModal")).hide();
+                } else {
+                    alert("Ошибка при обновлении жанра.");
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+            }
+        })
 
         fetchTracks();
         fetchAlbums();

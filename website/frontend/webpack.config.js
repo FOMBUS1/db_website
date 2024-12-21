@@ -35,7 +35,9 @@ module.exports = {
           { from: 'src/html/main.html', to: 'main.html' },
           { from: 'src/html/performers.html', to: 'performers.html'},
           { from: 'src/html/albums.html', to: 'albums.html'},
-          { from: 'src/html/tracks.html', to: 'tracks.html'}
+          { from: 'src/html/tracks.html', to: 'tracks.html'},
+          { from: 'src/html/playlistChoice.html', to: 'playlistChoice.html'},
+          { from: 'src/html/playlist.html', to: 'playlist.html'}
       ]
   })
   ],

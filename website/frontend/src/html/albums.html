@@ -406,7 +406,7 @@
                     fetchGenres();
                     bootstrap.Modal.getInstance(document.getElementById("addGenreModal")).hide();
                 } else {
-                    alert("Ошибка при добавлении альбома.");
+                    alert("Ошибка при добавлении жанра.");
                 }
             } catch (error) {
                 console.error("Ошибка:", error);
@@ -555,23 +555,9 @@
             }
         });
         
-        async function deleteEdit(id) {
-            if(!confirm("Вы уверены, что хотите удалить этот жанр?")) return;
-
-            try {
-                const response = await fetch(`${genresURL}/${id}`, { method: "DELETE" });
-                if (response.ok) {
-                    fetchAlbums();
-                } else {
-                    alert("Ошибка при удалении альбома.");
-                }
-            } catch (error) {
-                console.error("Ошибка:", error);
-            }
-        }
 
         async function deleteGenre(id) {
-            if(!confirm("Вы уверены, что хотите удалить этот альбом?")) return;
+            if(!confirm("Вы уверены, что хотите удалить этот жанр?")) return;
 
             try {
                 const response = await fetch(`${genresURL}/${id}`, { method: "DELETE" });

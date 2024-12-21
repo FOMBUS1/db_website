@@ -64,7 +64,6 @@ async def add_new_track(track: TrackCreate, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=403, detail="Трек с таким именем в этом альбоме уже существует!")
     new_track = Track(Track_Title=track.Track_Title, 
                       Album_FK=track.Album_FK,
-                      Playlist_FK=track.Playlist_FK if track.Playlist_FK != 0 else None,
                       MoodTag_FK=track.MoodTag_FK,
                       ActionTag_FK=track.ActionTag_FK,
                       Duration=track.Duration)
@@ -75,7 +74,6 @@ async def add_new_track(track: TrackCreate, db: AsyncSession = Depends(get_db)):
     return {
             "Track_Title": track.Track_Title,
             "Album_FK": track.Album_FK,
-            "Playlist_FK": track.Playlist_FK,
             "MoodTag_FK": track.MoodTag_FK,
             "ActionTag_FK": track.ActionTag_FK,
             "Duration": track.Duration
@@ -106,7 +104,6 @@ async def update_album(id: int, track_update: TrackUpdate, db: AsyncSession = De
 
         track.Track_Title = track_update.Track_Title
         track.Album_FK = track_update.Album_FK
-        track.Playlist_FK = track_update.Playlist_FK
         track.MoodTag_FK = track_update.MoodTag_FK
         track.ActionTag_FK = track_update.ActionTag_FK
         track.Duration = track_update.Duration
@@ -117,7 +114,6 @@ async def update_album(id: int, track_update: TrackUpdate, db: AsyncSession = De
         return {"message": "Трек успешно обновлён",
             "Track_Title": track.Track_Title,
             "Album_FK": track.Album_FK,
-            "Playlist_FK": track.Playlist_FK,
             "MoodTag_FK": track.MoodTag_FK,
             "ActionTag_FK": track.ActionTag_FK,
             "Duration": track.Duration
