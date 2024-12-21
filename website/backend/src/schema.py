@@ -65,3 +65,11 @@ class PlaylistCreate(BaseModel):
 
 class PlaylistUpdate(BaseModel):
     Playlist_Title: str
+
+class AddTrack(BaseModel):
+    Playlist_ID: int
+    Track_ID: int
+
+class DeleteTrack(BaseModel):
+    Playlist_ID: int
+    Track_ID: int

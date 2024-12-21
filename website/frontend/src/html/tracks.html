@@ -510,13 +510,67 @@
             displayTracks(filtered);
         }
 
-        function displayTracks(tracksToDisplay) {
+        function getUserIDFromCookies() {
+            const match = document.cookie.match(/UserID=([^;]+)/);
+            return match ? match[1] : null;
+        }
+
+        async function getPlaylists(userID) {
+            console.log(userID);
+            try {
+                const response = await fetch(`http://localhost:8000/playlists/${userID}`);
+                if (response.ok) {
+                    return await response.json();
+                } else {
+                    console.error('Failed to fetch playlists:', response.statusText);
+                    return [];
+                }
+            } catch (error) {
+                console.error('Error fetching playlists:', error);
+                return [];
+            }
+        }
+
+        async function addTrackToPlaylist(trackID, playlistID) {
+            try {
+                const response = await fetch("http://localhost:8000/playlist", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        Playlist_ID: playlistID,
+                        Track_ID: trackID
+                    })
+                });
+                if (response.ok) {
+                    alert("Трек успешно добавлен в плейлист!");
+                } else {
+                    alert("Ошибка при добавлении трека в плейлист.");
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+            }
+        }
+
+
+        async function displayTracks(tracksToDisplay) {
+            const userID = getUserIDFromCookies();
+            if (!userID) {
+                console.error('UserID not found in cookies');
+                return;
+            }
+
+            const playlists = await getPlaylists(userID);
+
             const tracksList = document.getElementById("tracksList");
             tracksList.innerHTML = "";
 
             tracksToDisplay.forEach(track => {
-                const trackCard = document.createElement("div");
-                trackCard.classList.add("card");
+            const trackCard = document.createElement("div");
+            trackCard.classList.add("card");
+
+            const playlistDropdown = playlists.map(playlist =>
+                `<option value="${playlist.Playlist_ID}">${playlist.Playlist_Title}</option>`
+            ).join('');
 
                 trackCard.innerHTML = `
                     <div class="card-body d-flex justify-content-between align-items-center">
@@ -527,13 +581,25 @@
                             <p class="mb-0">Действие: ${track.ActionTag_Title}</p>
                             <p class="mb-0">Длительность: ${track.Duration}</p>
                         </div>
-                         <div>
+                        <div>
+                            <select class="form-select mb-2" id="playlistSelect-${track.Track_ID}">
+                                <option value="" disabled selected>Выберите плейлист</option>
+                                ${playlistDropdown}
+                            </select>
+                            <button class="btn btn-primary btn-sm" onclick="
+                                const playlistID = document.getElementById('playlistSelect-${track.Track_ID}').value;
+                                if (playlistID) {
+                                    addTrackToPlaylist(${track.Track_ID}, playlistID);
+                                } else {
+                                    alert('Пожалуйста, выберите плейлист');
+                                }
+                            ">Добавить в плейлист</button>
                             <button class="btn btn-warning btn-sm me-2" onclick="editTrack(${track.Track_ID},
                                     '${track.Track_Title}', 
-                                     ${track.Album_FK}, 
-                                     ${track.MoodTag_FK},
-                                     ${track.ActionTag_FK},
-                                     ${track.Duration})">
+                                    ${track.Album_FK}, 
+                                    ${track.MoodTag_FK},
+                                    ${track.ActionTag_FK},
+                                    ${track.Duration})">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button class="btn btn-danger btn-sm" onclick="deleteTrack(${track.Track_ID})">
@@ -543,9 +609,10 @@
                     </div>
                 `;
 
-                tracksList.appendChild(trackCard);
-            });
-        }
+                    tracksList.appendChild(trackCard);
+                });
+            }
+
 
         function displayMoodTags(moodTagsToDisplay) {
             const moodTagList = document.getElementById("moodTagsList");

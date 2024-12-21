@@ -107,7 +107,7 @@
 
     <script>
         const apiBaseUrl = 'http://localhost:8000';
-        const UserID = document.cookie.split('UserID=')[1];
+        const UserID = document.cookie.split('UserID=')[1].split(';')[0];
 
         document.getElementById("deletePlaylistBtn").addEventListener("click", async () => {
             const playlistId = document.getElementById("existingPlaylist").value;
