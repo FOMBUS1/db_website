@@ -3,8 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.exc import SQLAlchemyError
 
-from src.schema import UserUpdate
-from src.models.users import User
+from src.schema import UserCreate, UserUpdate
+from src.models.tables import User
 from src.database import get_db
 
 router = APIRouter()
@@ -18,7 +18,7 @@ async def get_user(id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Пользователь не найден")
     return {"User_ID": user.User_ID, "Username": user.Username}
 
-@router.get("/users/", response_model=list)
+@router.get("/users", response_model=list)
 async def get_all_users(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User))
     users = result.scalars().all()
@@ -50,7 +50,7 @@ async def update_user(id: int, user_update: UserUpdate, db: AsyncSession = Depen
             raise HTTPException(status_code=404, detail="Пользователь не найден")
 
         # Обновляем имя пользователя
-        user.Username = user_update.username
+        user.Username = user_update.Username
         await db.commit()
         await db.refresh(user)
 
@@ -61,12 +61,12 @@ async def update_user(id: int, user_update: UserUpdate, db: AsyncSession = Depen
         raise HTTPException(status_code=500, detail=f"Ошибка сервера: {str(e)}")
 
 # Асинхронный метод для создания нового пользователя
-@router.post("/users/", response_model=dict)
-async def create_new_user(username: str, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(User).filter(User.Username == username))
+@router.post("/users", response_model=dict)
+async def create_new_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).filter(User.Username == user.Username))
     if (len(result.scalars().all()) > 0):
         raise HTTPException(status_code=403, detail="Пользователь с таким именем уже существует!")
-    new_user = User(Username=username)
+    new_user = User(Username=user.Username)
     db.add(new_user)
     await db.commit()
     await db.refresh(new_user)

@@ -41,7 +41,7 @@
                         <label for="newUserName">Имя пользователя</label>
                         <input type="text" class="form-control" id="newUserName" placeholder="Введите имя пользователя" required>
                     </div>
-                    <button type="submit" class="btn btn-success">Создать</button>
+                    <button type="submit" class="btn btn-success" id="addUserBtn">Создать</button>
                 </form>
             </div>
         </div>
@@ -75,17 +75,60 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
-        const apiBaseUrl = 'http://127.0.0.1:8000';
+        const apiBaseUrl = 'http://localhost:8000';
+
+        document.getElementById("deleteUserBtn").addEventListener("click", async () => {
+            const userId = document.getElementById("existingUser").value;
+            try {
+                const response = await fetch(`${apiBaseUrl}/users/${userId}`, {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                }); if (response.ok) {
+                    alert("Пользователь успешно удален!");
+                    fetchUsers();
+                } else {
+                    alert("Ошибка при добавлении пользователя.");
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+            }
+        })
+
+        document.getElementById("addUserBtn").addEventListener("click", async () => {
+            const newUsername = document.getElementById("newUserName").value;
+            if (!newUsername) {
+                alert("Заполните все поля.");
+                return;
+            }
+            try {
+                const response = await fetch(`${apiBaseUrl}/users`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        Username: newUsername,
+                    })
+                }); if (response.ok) {
+                    document.getElementById("newUserName").value = "";
+                    fetchUsers();
+                } else {
+                    alert("Ошибка при добавлении пользователя.");
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+            }
+        })
 
         // Функция для загрузки пользователей
         async function fetchUsers() {
             try {
-                const response = await fetch(`${apiBaseUrl}/users/`);
+                const response = await fetch(`${apiBaseUrl}/users`, {
+                    method: "GET",
+            });
                 if (!response.ok) throw new Error('Ошибка при загрузке пользователей');
                 
                 const users = await response.json();
                 const userSelect = document.getElementById('existingUser');
-                userSelect.innerHTML = ''; // Очистка списка
+                userSelect.innerHTML = ''; 
 
                 if (users.length === 0) {
                     userSelect.innerHTML = '<option>Пользователи не найдены</option>';
@@ -127,12 +170,15 @@
         }
 
         try {
+            console.log(userId);
             const response = await fetch(`${apiBaseUrl}/users/${userId}`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json', // Убедитесь, что Content-Type указан как 'application/json'
+                    'Content-Type': 'application/json', 
                 },
-                body: JSON.stringify({ username: newUsername }), // Отправка данных в правильном формате
+                body: JSON.stringify({ 
+                    Username: newUsername 
+                }),
             });
 
             if (!response.ok) throw new Error('Ошибка при обновлении пользователя');
@@ -158,7 +204,7 @@
             }
 
         // Устанавливаем никнейм в куки
-        document.cookie = `username=${selectedUserName}; path=/`;
+        document.cookie = `UserID=${selectedUserId}; path=/`;
 
         // Перенаправляем на другую страницу
         window.location.href = "main.html";
@@ -166,7 +212,7 @@
 
 
         // Загрузка пользователей при загрузке страницы
-        window.addEventListener('DOMContentLoaded', fetchUsers);
+        fetchUsers();
 
     </script>
     <!-- Подключение Bootstrap 5 CSS -->
