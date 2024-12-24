@@ -5,7 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import joinedload, selectinload
 
 from src.schema import AlbumCreate,AlbumUpdate
-from src.models.albums import Album
+from src.models.tables import Album
 from src.database import get_db
 
 router = APIRouter()
@@ -25,8 +25,8 @@ async def get_all_albums(db: AsyncSession = Depends(get_db)):
             "Album_ID": album.Album_ID,
             "Album_Title": album.Album_Title,
             "Album_Year": album.Album_Year,
-            "Performer_Name": album.performer.Performer_Name,
-            "Genre_Title": album.genre.Genre_Title
+            "Performer_Name": album.performer.Performer_Name if album.performer is not None else None,
+            "Genre_Title": album.genre.Genre_Title if album.genre is not None else None
             } for album in albums]
 
 @router.get("/albums/{id}", response_model=dict)
@@ -45,8 +45,8 @@ async def get_all_albums(id: int, db: AsyncSession = Depends(get_db)):
             "Album_ID": album.Album_ID,
             "Album_Title": album.Album_Title,
             "Album_Year": album.Album_Year,
-            "Performer_Name": album.performer.Performer_Name,
-            "Genre_Title": album.genre.Genre_Title
+            "Performer_Name": album.performer.Performer_Name if album.performer is not None else None,
+            "Genre_Title": album.genre.Genre_Title if album.genre is not None else None
             }
 
 @router.post("/albums", response_model=dict)

@@ -14,11 +14,19 @@ module.exports = {
   },
   devServer: {
     static: path.resolve(__dirname, 'dist'),
+    host: '0.0.0.0',
     port: 8080,
+    open: true,
     hot: true, 
     client: {
-      overlay: false
-    }
+      overlay: false,
+      webSocketURL: {
+        hostname: 'react-tunnel.ngrok.io',
+        port: 0,
+        protocol: 'wss',
+      },
+    },
+    allowedHosts: 'all',
   },
   plugins: [
     new HtmlWebpackPlugin({ template: './src/html/user.html' }),
@@ -26,7 +34,10 @@ module.exports = {
       patterns: [
           { from: 'src/html/main.html', to: 'main.html' },
           { from: 'src/html/performers.html', to: 'performers.html'},
-          { from: 'src/html/albums.html', to: 'albums.html'}
+          { from: 'src/html/albums.html', to: 'albums.html'},
+          { from: 'src/html/tracks.html', to: 'tracks.html'},
+          { from: 'src/html/playlistChoice.html', to: 'playlistChoice.html'},
+          { from: 'src/html/playlist.html', to: 'playlist.html'}
       ]
   })
   ],

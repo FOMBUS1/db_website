@@ -4,7 +4,7 @@ from sqlalchemy.future import select
 from sqlalchemy.exc import SQLAlchemyError
 
 from src.schema import PerformerCreate, PerformerUpdate
-from src.models.performers import Performer
+from src.models.tables import Performer
 from src.database import get_db
 
 router = APIRouter()
